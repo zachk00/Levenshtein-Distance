@@ -1,4 +1,4 @@
-import com.sun.org.apache.xpath.internal.objects.XObject;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,7 +29,7 @@ public class GUI implements ActionListener {
 
     private static Tool tool = new Tool();
     public static void main(String[] args) {
-
+        //create GUI
         frame = new JFrame();
         panel = new JPanel();
 
@@ -85,6 +85,7 @@ public class GUI implements ActionListener {
 
   @Override
     public void actionPerformed(ActionEvent e) {
+        // update answer label using tool class, clear any old steps in text area
         textLoaded = !fromInput.getText().isEmpty() && !toInput.getText().isEmpty();
         if(e.getSource() == enter){
             String originalString = fromInput.getText();
@@ -96,6 +97,8 @@ public class GUI implements ActionListener {
 
         }
         else if(e.getSource() == showPath && textLoaded){
+            // clear any old text in the text area for steps
+            // update steps for edits using tool class
             LinkedList<String> editSteps = tool.getOrderOfOperations();
             steps.setText("");
             for(String step : editSteps){
