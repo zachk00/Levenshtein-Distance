@@ -15,7 +15,7 @@ public class Tool {
         return this.result;
     }
 
-    public LinkedList<String> getOrderOfOperations(){
+    public LinkedList<String> getOrderOfOperations(){ // the order of operations must be fliped, as it is initially found backwards
         LinkedList<String> operations = new LinkedList<String>();
         while(!this.orderOfOperations.isEmpty()){
             operations.add(orderOfOperations.pop());
@@ -60,16 +60,16 @@ public class Tool {
             }
 
         }
-        //debug(matrix, from, to);
-        orderOfOperations(matrix, from, to);
+        
+        orderOfOperations(matrix, from, to); // use completed matrix to find order of operations
         this.result = matrix[to.length()][from.length()];
     }
 
-    private static int[][] initMatrix(String from, String to) {
+    private static int[][] initMatrix(String from, String to) {//initializes 2d array based on the lengths of the input strings + 1, which accounts for the empty string
 
         int[][] initial = new int[to.length() + 1][from.length() + 1];
 
-        for (int i = 0; i < from.length() + 1; i++) {
+        for (int i = 0; i < from.length() + 1; i++) {//row
             initial[0][i] = i;
         }
 
@@ -81,7 +81,7 @@ public class Tool {
         return initial;
     }
 
-    private static void debug(int[][] matrix, String from, String to) {
+    private static void debug(int[][] matrix, String from, String to) {//method to print out values stored in 2d array for debugging
         for (int i = 0; i < from.length() + 1; i++) {
             for (int j = 0; j < to.length() + 1; j++) {
                 System.out.print(matrix[j][i] + " ");
@@ -90,7 +90,17 @@ public class Tool {
         }
     }
 
-    private static Map<Character, Integer> minRepeated(String from, String to) {
+    private static Map<Character, Integer> minRepeated(String from, String to) { 
+        
+        /*  
+            In the algorithm to find the levenshtein edit distance, characters which are equal must be taken into account
+            this is because letters that the same require no action, meaning no edit is needed
+            this method finds how many times each character in the original string appears in the final string
+            Ex. Seen -> Teen
+            The letter 'e' appears twice in both teen and seen, and therefore no action should be taken when comparing those two characters
+            ( <s, 0 >, <e, 2> , <n, 1>) would be the resulting map produced
+        */
+        
         Map<Character, Integer> repeated = new HashMap<Character, Integer>();
 
         for (int i = 0; i < from.length(); i++) {
@@ -110,51 +120,55 @@ public class Tool {
 
     private void orderOfOperations(int[][] matrix, String from, String to) {
 
-        Stack<String> operations = new Stack<String>();
+        Stack<String> operations = new Stack<String>(); // stores order of operations in reverse, will utilizes last in, first out principle to get correct order
 
-        int curr = matrix[matrix.length - 1][matrix[0].length - 1];
-        int col = matrix.length - 1;
-        int row = matrix[0].length - 1;
+        int curr = matrix[matrix.length - 1][matrix[0].length - 1]; //value in the current square
+        int col = matrix.length - 1; // current column
+        int row = matrix[0].length - 1; // current row
         boolean nextCol;
         boolean nextRow;
-        int indexRow, indexCol;
-        //System.out.println(matrix[0].length); // rows
-        //System.out.println(matrix.length); //cols
+        int indexRow, indexCol; // location at which operation occurrs in original string
+        
 
 
-        while (col > 0 && row > 0) {
+        while (col > 0 && row > 0) {//loop until adjacent to the top left square
+            //ensure no out of bounds via checking to see if next index is greater than zero
             nextCol = col - 1 >= 0;
             nextRow = row - 1 >= 0;
+            // if diagonal square is valid, and is greater than or equal to the other squares, take that square
             if (nextCol && nextRow && matrix[col - 1][row] >= matrix[col - 1][row - 1] && matrix[col][row - 1] >= matrix[col - 1][row - 1]) {
                 row--;
                 col--;
+                //if the characters in that row/col are equal, then no operation is necessary
                 if (from.charAt(row) == to.charAt(col)) {
 
                     operations.push("Nothing");
                 } else {
+                   //other wise, we must replace the letter in the row with the letter in the collumn
                    indexCol = col;
                    indexRow = row;
                    operations.push("Replace "+ from.charAt(row) + " at index " + indexRow +  " with " + to.charAt(col) + "." );
                 }
-            } else if (nextRow && nextCol && matrix[col][row - 1] >= matrix[col - 1][row]) {
-                if(curr - 1 == matrix[col - 1][row] || curr == matrix[col - 1][row]){
+            } else if (nextRow && nextCol && matrix[col][row - 1] >= matrix[col - 1][row]) { // otherwise, if the top square is greater or equal to the left square
+                if(curr - 1 == matrix[col - 1][row] || curr == matrix[col - 1][row]){// and the current values is one greater or equal to the value of top left square
+                    //select this square and perform an insertion of the column's character
                     indexCol = col;
                     operations.push("Insert " + to.charAt(col) + " at index " + indexCol +  ".");
                     col--;
 
                 }
 
-            } else{
+            } else{ //otherwise perform a deletion of the character from the next hiest row
                 indexRow = row - 1;
                 operations.push("Delete " + from.charAt(row - 1) + " at index " + indexRow + ".");//
                 row--;
 
             }
 
-            curr = matrix[col][row];
+            curr = matrix[col][row]; //update the value of the square to the current square
 
         }
-
+        //solve the last step to reach the top left square
         if(col == 1 && row == 0){
             indexCol = col - 1;
             operations.push("Insert " + to.charAt(col - 1) +  " at index " + indexCol + ".");
