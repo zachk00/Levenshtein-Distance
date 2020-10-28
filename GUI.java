@@ -85,9 +85,10 @@ public class GUI implements ActionListener {
 
   @Override
     public void actionPerformed(ActionEvent e) {
-        // update answer label using tool class, clear any old steps in text area
-        textLoaded = !fromInput.getText().isEmpty() && !toInput.getText().isEmpty();
+        textLoaded = !fromInput.getText().isEmpty() || !toInput.getText().isEmpty();
         if(e.getSource() == enter){
+            // update answer label using tool class, clear any old steps in text area
+            steps.setText("");
             String originalString = fromInput.getText();
             String finalString = toInput.getText();
             String answer = "";
@@ -101,6 +102,7 @@ public class GUI implements ActionListener {
             // update steps for edits using tool class
             LinkedList<String> editSteps = tool.getOrderOfOperations();
             steps.setText("");
+
             for(String step : editSteps){
                 if(!step.equalsIgnoreCase("Nothing")){
                     steps.append(step + newline);
