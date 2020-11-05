@@ -1,27 +1,27 @@
 
 
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.LinkedList;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
-public class GUI implements ActionListener {
+
+public class GUI implements ActionListener, ItemListener {
 
     private static JFrame frame;
     private static JPanel panel;
     private static JLabel from;
     private static JTextField fromInput;
-    private static JLabel to;
     private static JTextField toInput;
     private static JButton enter;
     private static JLabel result;
     private static JButton showPath;
     private static JTextArea steps;
-    private static boolean textLoaded;
-
-
-
+    private static JCheckBox nothing;
+    private static boolean showNothing = false;
     private final static String newline = "\n";
 
 
@@ -29,7 +29,7 @@ public class GUI implements ActionListener {
 
     private static Tool tool = new Tool();
     public static void main(String[] args) {
-        //create GUI
+
         frame = new JFrame();
         panel = new JPanel();
 
@@ -49,7 +49,7 @@ public class GUI implements ActionListener {
         fromInput.setBounds(100, 20, 165, 25);
         panel.add(fromInput);
 
-        to = new JLabel("Final");
+        JLabel to = new JLabel("Final");
         to.setBounds(10, 50, 80, 25);
         panel.add(to);
 
@@ -58,7 +58,7 @@ public class GUI implements ActionListener {
         panel.add(toInput);
 
         enter = new JButton("Enter");
-        enter.setBounds(10, 80, 80, 25);
+        enter.setBounds(10, 80, 120, 25);
         enter.addActionListener(new GUI());
         panel.add(enter);
 
@@ -78,6 +78,13 @@ public class GUI implements ActionListener {
         steps.setBackground(Color.LIGHT_GRAY);
         panel.add(steps);
 
+
+        nothing = new JCheckBox("Show 'Nothing' Steps");
+
+        nothing.setBounds(300, 20, 165, 20);
+        nothing.addItemListener(new GUI());
+        panel.add(nothing);
+
         frame.setVisible(true);
 
     }
@@ -85,9 +92,8 @@ public class GUI implements ActionListener {
 
   @Override
     public void actionPerformed(ActionEvent e) {
-        textLoaded = !fromInput.getText().isEmpty() || !toInput.getText().isEmpty();
+      boolean textLoaded = !fromInput.getText().isEmpty() || !toInput.getText().isEmpty();
         if(e.getSource() == enter){
-            // update answer label using tool class, clear any old steps in text area
             steps.setText("");
             String originalString = fromInput.getText();
             String finalString = toInput.getText();
@@ -98,14 +104,16 @@ public class GUI implements ActionListener {
 
         }
         else if(e.getSource() == showPath && textLoaded){
-            // clear any old text in the text area for steps
-            // update steps for edits using tool class
-            LinkedList<String> editSteps = tool.getOrderOfOperations();
+
             steps.setText("");
 
-            for(String step : editSteps){
-                if(!step.equalsIgnoreCase("Nothing")){
-                    steps.append(step + newline);
+            for(int i = tool.getOrderOfOperations().size() - 1; i >= 0; i--){
+
+                if(!tool.getOrderOfOperations().get(i).equalsIgnoreCase("nothing")&& !showNothing){
+                   steps.append(tool.getOrderOfOperations().get(i) + newline);
+                }
+                else if (showNothing){
+                    steps.append(tool.getOrderOfOperations().get(i) + newline);
                 }
             }
 
@@ -113,8 +121,14 @@ public class GUI implements ActionListener {
 
     }
 
-
-
-
-
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+        if(e.getStateChange() == 1){
+            showNothing = true;
+        }
+        else{
+            showNothing = false;
+        }
+    }
 }
+
