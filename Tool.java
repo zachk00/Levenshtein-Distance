@@ -1,11 +1,10 @@
-
-
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Tool {
     private int result;
-    private Stack<String> orderOfOperations;
+    private static ArrayList orderOfOperations;
 
     public Tool() {
         result = 0;
@@ -15,18 +14,15 @@ public class Tool {
         return this.result;
     }
 
-    public LinkedList<String> getOrderOfOperations(){ // the order of operations must be fliped, as it is initially found backwards
-        LinkedList<String> operations = new LinkedList<String>();
-        while(!this.orderOfOperations.isEmpty()){
-            operations.add(orderOfOperations.pop());
-        }
-        return operations;
+    public ArrayList<String> getOrderOfOperations(){ // the order of operations must be fliped, as it is initially found backwards
+        return orderOfOperations;
     }
 
     public void editDistance(String from, String to) {
         //col, row
         //edit distance is 0 if strings are equal
         if (from.equalsIgnoreCase(to)) {
+
             this.result = 0;
         }
         from = from.toLowerCase();
@@ -60,7 +56,7 @@ public class Tool {
             }
 
         }
-        
+        //debug(matrix,from,to);
         orderOfOperations(matrix, from, to); // use completed matrix to find order of operations
         this.result = matrix[to.length()][from.length()];
     }
@@ -90,9 +86,9 @@ public class Tool {
         }
     }
 
-    private static Map<Character, Integer> minRepeated(String from, String to) { 
-        
-        /*  
+    private static Map<Character, Integer> minRepeated(String from, String to) {
+
+        /*
             In the algorithm to find the levenshtein edit distance, characters which are equal must be taken into account
             this is because letters that the same require no action, meaning no edit is needed
             this method finds how many times each character in the original string appears in the final string
@@ -100,7 +96,7 @@ public class Tool {
             The letter 'e' appears twice in both teen and seen, and therefore no action should be taken when comparing those two characters
             ( <s, 0 >, <e, 2> , <n, 1>) would be the resulting map produced
         */
-        
+
         Map<Character, Integer> repeated = new HashMap<Character, Integer>();
 
         for (int i = 0; i < from.length(); i++) {
@@ -120,8 +116,8 @@ public class Tool {
 
     private void orderOfOperations(int[][] matrix, String from, String to) {
 
-        Stack<String> operations = new Stack<String>(); // stores order of operations in reverse, will utilizes last in, first out principle to get correct order
 
+        ArrayList operations = new ArrayList();
         int curr = matrix[matrix.length - 1][matrix[0].length - 1]; //value in the current square
         int col = matrix.length - 1; // current column
         int row = matrix[0].length - 1; // current row
@@ -139,18 +135,18 @@ public class Tool {
                 //if the characters in that row/col are equal, then no operation is necessary
                 if (from.charAt(row) == to.charAt(col)) {
 
-                    operations.push("Nothing");
+                    operations.add("Nothing");
                 } else {
-                    //other wise, we must replace the letter in the row with the letter in the collumn
+                    //other wise, we must replace the letter in the row with the letter in the column
                     indexCol = col;
                     indexRow = row;
-                    operations.push("Replace "+ from.charAt(row) + " at index " + indexRow +  " with " + to.charAt(col) + "." );
+                    operations.add("Replace "+ from.charAt(row) + " at index " + indexRow +  " with " + to.charAt(col) + "." );
                 }
             } else if (row == 0 || col != 0 && matrix[col][row - 1] >= matrix[col - 1][row]) { // otherwise, if the top square is greater or equal to the left square
                 if(curr - 1 == matrix[col - 1][row] || curr == matrix[col - 1][row]){// and the current values is one greater or equal to the value of top left square
                     //select this square and perform an insertion of the column's character
-                    indexCol =  - 1;
-                    operations.push("Insert " + to.charAt(col - 1) + " at index " + indexCol +  ".");
+                    indexCol = col - 1;
+                    operations.add("Insert " + to.charAt(col - 1) + " at index " + indexCol +  ".");
                     col--;
 
                 }
@@ -158,7 +154,7 @@ public class Tool {
             } else{ //otherwise perform a deletion of the character from the next highest row
 
                 indexRow = row - 1;
-                operations.push("Delete " + from.charAt(indexRow) + " at index " + indexRow + ".");//
+                operations.add("Delete " + from.charAt(indexRow) + " at index " + indexRow + ".");//
                 row--;
 
             }
@@ -166,22 +162,10 @@ public class Tool {
             curr = matrix[col][row]; //update the value of the square to the current square
 
         }
-        //solve final step
-        if(col == 1 && row == 0){
-            indexCol = col - 1;
-            operations.push("Insert " + to.charAt(col - 1) +  " at index " + indexCol + ".");
-
-        }else if(row == 1 && col == 0){
-            indexRow = row - 1;
-            operations.push("Delete " + from.charAt(row - 1) + " at index " + indexRow + "." );
 
 
-        }else if(row == 1 && col == 1){
-            operations.push("Replace " + from.charAt(row) + " with " + to.charAt(col - 1));
-
-        }
-
-        this.orderOfOperations  = operations;
+        orderOfOperations  = operations;
 
     }
+
 }
